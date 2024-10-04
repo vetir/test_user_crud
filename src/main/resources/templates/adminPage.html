@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org" xmlns:display="http://www.w3.org/1999/xhtml">
+<!---->
+<head>
+    <meta charset="UTF-8">
+    <title>Admin panel</title>
+
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+          integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T"
+          crossorigin="anonymous">
+    <style>
+
+    </style>
+
+</head>
+<body>
+<ul class="navbar navbar-expand-xl navbar-dark bg-dark" style="list-style: none">
+    <li style="justify-content: left; color: white" class="nav-item">
+        <div class="title" th:text="${'Username: ' + loggedInUser.getUsername()}">Username</div>
+
+    </li>
+    <li style="justify-content: left; color: white" class="nav-item">
+        <div class="title" style="position: relative; left:30px"
+             th:text="${'With roles: ' + loggedInUser.getRoleNames()}">With roles:</div>
+    </li>
+    <li class="nav-item ml-auto">
+        <a class="nav-link" href='/logout'>Logout</a>
+    </li>
+</ul>
+
+<!--    Navbar   -->
+<div class="row">
+    <div class="col-lg-2" style="background-color: white">
+        <div class="nav flex-column nav-pills" id="v-pills-tab" role="tablist" aria-orientation="vertical" >
+            <a class="nav-link active" id="v-pills-home-tab" th:href="@{/admin}" role="tab" aria-controls="v-pills-home"
+               aria-selected="true">Admin panel</a>
+            <a class="nav-link" id="v-pills-profile-tab" th:href="@{/user}" role="tab" aria-controls="v-pills-profile"
+               aria-selected="false">User page</a>
+        </div>
+    </div>
+
+    <!--      Page body      -->
+    <div class="col-lg-10 tab-content" style="background-color: whitesmoke">
+        <div class="tab-content">
+            <h1>Admin panel</h1>
+
+            <ul class="nav nav-tabs" id="horizontalNavLinks">
+                <li class="nav-item">
+                    <button class="nav-link active" id="usersTableTab" onclick="showUsersTable()">Users list</button>
+                </li>
+                <!--    Add user button     -->
+                <li class="nav-item">
+                    <button class="nav-link" id="addUserTab" onclick="showAddUserForm()">Add user</button>
+                </li>
+            </ul>
+
+            <!--        Users table     -->
+            <div id="usersTable">
+                <table class="table table-striped table hover">
+                    <thead>
+                    <tr>
+                        <th scope="col">ID</th>
+                        <th scope="col">Username</th>
+                        <th scope="col">Email</th>
+                        <th scope="col">Age</th>
+                        <th scope="col">Roles</th>
+                        <th scope="col">Edit</th>
+                        <th scope="col">Delete</th>
+
+                    </tr>
+                    </thead>
+
+                    <tbody id="tableData">
+                    </tbody>
+                </table>
+            </div>
+
+                <!--     ADD USER FORM     -->
+            <div class="container" id="addUserForm" style="align-items: center; text-align: center; width: 70%;
+                                         margin-left: 15%; margin-top: 20px; display:none">
+
+                <div class="form-group" style="align-items: center; text-align: center; width: 50%;
+                                               margin-left: 25%; margin-top: 20px">
+                    <label for="newUserId" class="col-form-label">ID</label>
+                    <input type="text" class="form-control" id="newUserId" name="newUserId" readonly>
+                </div>
+
+                <div class="form-group" style="align-items: center; text-align: center; width: 50%;
+                                             margin-left: 25%; margin-top: 20px">
+                    <label for="newUserUsername" class="col-form-label">Username</label>
+                    <input type="text" class="form-control" id="newUserUsername" name="newUserUsername" placeholder="Username">
+                    <span class="error-massage" id="usernameAddNewFieldError" style="color: red"></span>
+                </div>
+
+                <div class="form-group" style="align-items: center; text-align: center; width: 50%;
+                                             margin-left: 25%; margin-top: 20px">
+                    <label for="newUserPassword" class="col-form-label">Password</label>
+                    <input type="text" class="form-control" id="newUserPassword" name="newUserPassword" placeholder="Password">
+                    <span class="error-massage" id="passwordAddNewFieldError" style="color: red"></span>
+                </div>
+
+                <div class="form-group" style="align-items: center; text-align: center; width: 50%;
+                                             margin-left: 25%; margin-top: 20px">
+                    <label for="newUserEmail" class="col-form-label">Email</label>
+                    <input type="text" class="form-control" id="newUserEmail" name="newUserEmail" placeholder="email">
+                    <span class="error-massage" id="emailAddNewFieldError" style="color: red"></span>
+
+                </div>
+
+                <div class="form-group" style="align-items: center; text-align: center; width: 50%;
+                                                 margin-left: 25%; margin-top: 20px">
+                    <label for="newUserAge" class="col-form-label">Age</label>
+                    <input type="number" class="form-control" id="newUserAge" name="newUserAge" placeholder="age">
+                    <span class="error-massage" id="ageAddNewFieldError" style="color: red"></span>
+                </div>
+
+                <div class="custom-control custom-checkbox align-content-lg-start">
+                    <label>Roles:</label>
+                    <div id="newUserCheckboxesContainer">
+                        <!--Checkboxes insertion in JS script-->
+                    </div>
+                    <span class="error-massage" id="rolesAddNewFieldError" style="color: red"></span>
+                </div>
+                <button type="submit" id="addUserConfirmButton" class="btn btn-success">Add user</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+<!--              EDIT USER MODAL WINDOW         -->
+<div class="modal fade" id="editUserModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
+     aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="editModalLabel">Edit user</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+
+            <div class="modal-body">
+
+                <div class="form-group" style="align-items: center; text-align: center; width: 50%;
+                                     margin-left: 25%; margin-top: 20px">
+                    <label for="editId" class="col-form-label">ID</label>
+                    <input type="text" class="form-control" id="editId" name="username"
+                           readonly>
+                </div>
+
+                <div class="form-group" style="align-items: center; text-align: center; width: 50%;
+                                     margin-left: 25%; margin-top: 20px">
+                    <label for="editUsername" class="col-form-label">Username</label>
+                    <input type="text" class="form-control" id="editUsername" name="username">
+                    <span class="error-massage" id="usernameEditFieldError" style="color: red"></span>
+                    </div>
+                </div>
+
+
+                <div class="form-group" style="align-items: center; text-align: center; width: 50%;
+                                     margin-left: 25%; margin-top: 20px">
+                    <label for="editPassword" class="col-form-label">Password</label>
+                    <input type="text" class="form-control" id="editPassword" name="password">
+                    <span class="error-massage" id="passwordEditFieldError" style="color: red"></span>
+                </div>
+
+                <div class="form-group" style="align-items: center; text-align: center; width: 50%;
+                                     margin-left: 25%; margin-top: 20px">
+                    <label for="editEmail" class="col-form-label">Email</label>
+                    <input type="text" class="form-control" id="editEmail" name="email">
+                    <span class="error-massage" id="emailEditFieldError" style="color: red"></span>
+                </div>
+
+                <div class="form-group" style="align-items: center; text-align: center; width: 50%;
+                                     margin-left: 25%; margin-top: 20px">
+                    <label for="editAge" class="col-form-label">Age</label>
+                    <input type="number" class="form-control" id="editAge" name="age">
+                    <span class="error-massage" id="ageEditFieldError" style="color: red"></span>
+                </div>
+
+                <div class="custom-control custom-checkbox" style="align-items: center; text-align: center">
+                    <label>Roles:</label>
+                    <div id="editRolesCheckboxesContainer">
+                    <!--Checkboxes insertion in JS script-->
+                    </div>
+                    <span class="error-massage" id="rolesEditFieldError" style="color: red"></span>
+                </div>
+
+
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                <button type="submit" class="btn btn-primary" id="editConfirmButton">Save</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<!--              DELETE USER MODAL WINDOW          -->
+<div class="modal fade" id="deleteUserModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
+     aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="deleteModalLabel">Delete user</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+
+                <div class="modal-body">
+
+                    <div class="form-group" style="align-items: center; text-align: center; width: 50%;
+                                         margin-left: 25%; margin-top: 20px">
+                        <label for="editId" class="col-form-label">Username</label>
+                        <input type="text" class="form-control" id="deleteId" name="username"
+                                readonly>
+                    </div>
+
+                    <div class="form-group" style="align-items: center; text-align: center; width: 50%;
+                                         margin-left: 25%; margin-top: 20px">
+                        <label for="deleteUsername" class="col-form-label">Username</label>
+                        <input type="text" class="form-control" id="deleteUsername" name="username"
+                               readonly="readonly">
+                    </div>
+
+                    <!--                    <div class="form-group" style="align-items: center; text-align: center; width: 50%;-->
+                    <!--                                         margin-left: 25%; margin-top: 20px">-->
+                    <!--                        <label for="deletePassword" class="col-form-label">Password</label>-->
+                    <!--                        <input type="text" class="form-control" id="deletePassword" name="password"-->
+                    <!--                               th:field="*{password}" readonly>-->
+                    <!--                    </div>-->
+
+                    <div class="form-group" style="align-items: center; text-align: center; width: 50%;
+                                         margin-left: 25%; margin-top: 20px">
+                        <label for="deleteEmail" class="col-form-label">Email</label>
+                        <input type="text" class="form-control" id="deleteEmail" name="email"
+                                readonly>
+                    </div>
+
+                    <div class="form-group" style="align-items: center; text-align: center; width: 50%;
+                                         margin-left: 25%; margin-top: 20px">
+                        <label for="deleteAge" class="col-form-label">Age</label>
+                        <input type="number" class="form-control" id="deleteAge" name="age"
+                                readonly>
+                    </div>
+
+
+                    <div class="custom-control custom-checkbox" style="align-items: center; text-align: center">
+                        <label>Roles:</label>
+                        <div id="deleteRolesCheckboxesContainer">
+                            <!--Checkboxes insertion in JS script-->
+                        </div>
+                    </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                    <button type="submit" id="deleteConfirmButton" class="btn btn-primary">Delete</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.3.1.min.js"
+        integrity="sha384-tsQFqpEReu7ZLhBV2VZlAu7zcOV+rXbYlF2cqB8txI/8aZajjp4Bqd+V6D5IgvKT"
+        crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"
+        integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1"
+        crossorigin="anonymous"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"
+        integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM"
+        crossorigin="anonymous"></script>
+
+<script type ="text/javascript" th:src="@{/main.js}"></script>
+<script type ="text/javascript"  th:src="@{/tabManagment.js}"></script>
+
+</body>
+</html>

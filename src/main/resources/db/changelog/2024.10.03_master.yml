@@ -1,0 +1,9 @@
+databaseChangeLog:
+  - include:
+      file: db/changelog/2024.10.03_users_table.yml
+  - include:
+      file: db/changelog/2024.10.03_roles_table.yml
+  - include:
+      file: db/changelog/2024.10.03_users_roles_relationship.yml
+  - include:
+      file: db/changelog/2024.10.03_insert_users_roles.yml
