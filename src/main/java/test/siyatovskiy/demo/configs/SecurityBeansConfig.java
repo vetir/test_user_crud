@@ -1,6 +1,7 @@
 package test.siyatovskiy.demo.configs;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -10,6 +11,7 @@ import test.siyatovskiy.demo.repository.UserRepository;
 
 @Configuration
 @RequiredArgsConstructor
+@ComponentScan(basePackageClasses = UserDetailsService.class)
 public class SecurityBeansConfig implements UserDetailsService {
 
     private final UserRepository userRepository;
